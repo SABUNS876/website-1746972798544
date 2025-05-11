@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>AI Website - Chat with AI</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap');
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+  header {
+    padding: 1rem 1.5rem;
+    text-align: center;
+    background: rgba(0,0,0,0.2);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  header h1 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.75rem;
+    letter-spacing: 1px;
+    user-select: none;
+  }
+  #chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 1.5rem;
+    overflow-y: auto;
+    gap: 1rem;
+  }
+  .message {
+    display: flex;
+    align-items: flex-start;
+    max-width: 90%;
+    word-wrap: break-word;
+  }
+  .message.user {
+    align-self: flex-end;
+    justify-content: flex-end;
+  }
+  .bubble {
+    font-size: 1rem;
+    line-height: 1.4;
+    padding: 0.75rem 1rem;
+    border-radius: 20px;
+    max-width: 100%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    user-select: text;
+  }
+  .user .bubble {
+    background: #6b5b95;
+    border-bottom-right-radius: 0;
+    color: #f3e9f5;
+  }
+  .ai .bubble {
+    background: #f3e9f5dd;
+    color: #2a2139;
+    border-bottom-left-radius: 0;
+  }
+  #input-area {
+    display: flex;
+    padding: 0.75rem 1rem 1rem;
+    background: rgba(0,0,0,0.15);
+    align-items: center;
+    gap: 0.5rem;
+  }
+  #user-input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border-radius: 25px;
+    border: none;
+    font-size: 1rem;
+    font-family: inherit;
+    outline-offset: 2px;
+    outline-color: #baa0f7;
+  }
+  #user-input::placeholder {
+    color: #c4b5ffcc;
+  }
+  #send-btn {
+    background: #9f7aea;
+    border: none;
+    border-radius: 25px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #fff;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.25s ease;
+  }
+  #send-btn:disabled {
+    background: #6a4f9f99;
+    cursor: not-allowed;
+  }
+  #send-btn:hover:not(:disabled) {
+    background: #7951db;
+  }
+  @media (max-width: 400px) {
+    header h1 {
+      font-size: 1.4rem;
+    }
+    #send-btn {
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+    }
+    #user-input {
+      font-size: 0.9rem;
+    }
+    .message.user, .message.ai {
+      max-width: 80%;
+    }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Chat with Our AI</h1>
+</header>
+<div id="chat-container" role="log" aria-live="polite" aria-relevant="additions"></div>
+<form id="input-area" autocomplete="off" aria-label="Send message to AI">
+  <input type="text" id="user-input" name="user-input" placeholder="Type your message..." aria-label="Message input" required autofocus />
+  <button type="submit" id="send-btn" aria-label="Send message">Send</button>
+</form>
+<script>
+  (() => {
+    const chatContainer = document.getElementById('chat-container');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    // Function to append message to chat
+    function appendMessage(text, sender='ai') {
+      const messageElem = document.createElement('div');
+      messageElem.classList.add('message', sender);
+      
+      const bubble = document.createElement('div');
+      bubble.classList.add('bubble');
+      bubble.textContent = text;
+      
+      messageElem.appendChild(bubble);
+      chatContainer.appendChild(messageElem);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // Fake AI response generation
+    function generateAIResponse(msg) {
+      // Basic simulation of AI logic:
+      msg = msg.toLowerCase().trim();
+      if (!msg) return "Please say something.";
+      if (msg.includes('hello') || msg.includes('hi')) {
+        return "Hello! How can I assist you today?";
+      }
+      if (msg.includes('help')) {
+        return "Sure, I'm here to help you. What do you need?";
+      }
+      if (msg.includes('your name')) {
+        return "I am your AI assistant, ready to chat.";
+      }
+      if (msg.includes('thank')) {
+        return "You're welcome! Anything else you want to know?";
+      }
+      if (msg.includes('weather')) {
+        return "Weather info isn't available right now, but it's always a great day to learn something new!";
+      }
+      // Generic fallback
+      return "That's interesting! Tell me more or ask me another question.";
+    }
+
+    // Handle form submit
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const message = userInput.value.trim();
+      if (!message) return;
+
+      // Append user message
+      appendMessage(message, 'user');
+      userInput.value = '';
+      sendBtn.disabled = true;
+      userInput.disabled = true;
+
+      // Simulate AI thinking delay
+      setTimeout(() => {
+        const aiResponse = generateAIResponse(message);
+        appendMessage(aiResponse, 'ai');
+        sendBtn.disabled = false;
+        userInput.disabled = false;
+        userInput.focus();
+      }, 900);
+    }
+
+    // Keyboard accessibility enhancements
+    userInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        userInput.value = '';
+      }
+    });
+
+    document.getElementById('input-area').addEventListener('submit', handleFormSubmit);
+
+    // Welcome message on load
+    window.addEventListener('load', () => {
+      appendMessage("Hi! I'm your AI assistant. Ask me anything!", 'ai');
+      userInput.focus();
+    });
+  })();
+</script>
+</body>
+</html>
+
+```
